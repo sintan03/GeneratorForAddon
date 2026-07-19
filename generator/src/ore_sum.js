@@ -4,24 +4,27 @@ const path = require("path");
 
 const { PATHS } = require("./config/paths.js");
 const { loadImage } = require("./utils.js");
+const { makeOreOverlayer } = require("./ore_color.js");
 
 const INPUT_0 = "stone.overworld.png";
 const INPUT_1 = "diamond_ore.png";
 const INPUT_2 = "red_ore.png";
 const OUTPUT_0 = "red_ore.png";
 
-async function sumOreTexture(I0 = INPUT_0, I1 = INPUT_1, I2 = INPUT_2, O0 = OUTPUT_0, option = {}) {
+async function sumOreTexture(I0 = INPUT_0, I1 = INPUT_1, I2 = INPUT_2, O0 = OUTPUT_0, color = "#00ff00", brightMul = 2.0) {
 
     const inputPath_0 = path.join(PATHS.textures.ores.base, I0);
-    const inputPath_1 = path.join(PATHS.textures.ores.shadow, I1);
+    const inputPath_1 = path.join(PATHS.textures.ores.shadow, I0.split(".")[0] === `stone` ? I2 : `${I0.split(".")[0]}_${I2}`);
     const inputPath_2 = path.join(PATHS.textures.ores.colored, I2);
-    const outputPath_0 = path.join(PATHS.textures.ores.output, O0);
+    const outputPath_0 = path.join(PATHS.textures.ores.output, I0.split(".")[0] === `stone` ? O0 : `${I0.split(".")[0]}_${O0}`);
 
-    const { data, info } = await loadImage(I0);
+    await makeOreOverlayer(I1, I2, color, brightMul);
 
-    const shadow = await loadImage(I1);
+    const { data, info } = await loadImage(inputPath_0, false);
 
-    const colored = await loadImage(I2);
+    const shadow = await loadImage(inputPath_1);
+
+    const colored = await loadImage(inputPath_2, false);
 
     if (
         info.width !== shadow.info.width ||
@@ -65,7 +68,7 @@ async function sumOreTexture(I0 = INPUT_0, I1 = INPUT_1, I2 = INPUT_2, O0 = OUTP
             height: info.height,
             channels: 4
         }
-    }).png().toFile(O0);
+    }).png().toFile(outputPath_0);
 
 };
 

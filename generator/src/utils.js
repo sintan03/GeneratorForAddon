@@ -54,11 +54,37 @@ function hexToRgb(hex) {
     };
 }
 
-async function loadImage(path) {
-    return await sharp(path)
-        .ensureAlpha()
-        .raw()
-        .toBuffer({ resolveWithObject: true });
+async function loadImage(path, force = true, width = 16, height = 16) {
+
+    try {
+
+        return await sharp(path)
+            .ensureAlpha()
+            .raw()
+            .toBuffer({ resolveWithObject: true });
+
+    } catch {
+
+        if (force) {
+
+            console.warn(`${path} が存在しませんでしたが、そのまま続行しました`);
+
+            return {
+                data: Buffer.alloc(width * height * 4, 0),
+                info: {
+                    width: width,
+                    height: height,
+                    channels: 4
+                }
+            };
+
+        } else {
+
+            throw new Error(`${path} が存在しませんでした`);
+
+        };
+
+    };
 };
 
 module.exports = {
